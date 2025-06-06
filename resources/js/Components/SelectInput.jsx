@@ -6,15 +6,10 @@ export default forwardRef(function SelectInput(
 ) {
     const localRef = useRef(null);
 
-    // useImperativeHandle(ref, () => ({
-    //     focus: () => localRef.current?.focus(),
-    // }));
+    // const input = ref ? ref : useRef();
 
-    // useEffect(() => {
-    //     if (isFocused) {
-    //         localRef.current?.focus();
-    //     }
-    // }, [isFocused]);
+    // console.log('first', input);
+ 
 
     return (
         <select
