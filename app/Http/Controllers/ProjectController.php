@@ -7,6 +7,9 @@ use App\Models\Project;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\TaskResource;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use function Termwind\renderUsing;
 
 class ProjectController extends Controller
@@ -39,6 +42,7 @@ class ProjectController extends Controller
         return inertia("Project/Index", [
             "projects" => ProjectResource::collection($projects),
             "queryParams" => request()->query() ?: null,
+            'success' => session("success"),
         ]);
     }
 
@@ -47,7 +51,8 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        //
+        // dd('myo htet kyaw');
+        return inertia("Project/Create");
     }
 
     /**
@@ -55,7 +60,21 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request)
     {
-        //
+        $data = $request->validated();
+        /** @var \Illuminate\Http\UploadedFile */
+
+        $image = $data['image'] ?? null;
+        $data['created_by'] = Auth::id();
+        $data['updated_by'] = Auth::id();
+
+        if ($image) {
+            $data['image_path'] = $image->store('project/' . Str::random(), 'public');
+        }
+
+        // dd($data);
+        Project::create($data);
+
+        return to_route('project.index')->with('success', "Project was Created!");
     }
 
     /**
@@ -92,7 +111,9 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        //
+        return inertia('Project/Edit', [
+            'project' => new ProjectResource($project),
+        ]);
     }
 
     /**
@@ -100,14 +121,38 @@ class ProjectController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        //
+        $data = $request->validated();
+        $image = $data['image'] ?? null;
+        $data['created_by'] = Auth::id();
+        $data['updated_by'] = Auth::id();
+
+        if ($image) {
+            if ($project->image_path) {
+                Storage::disk('public')->deleteDirectory(dirname($project->image_path));
+            }
+            $data['image_path'] = $image->store('project/' . Str::random(), 'public');
+        }
+        $project->update($data);
+
+        return to_route('project.index')->with('success', "Project \"$project->name\" was updated!");
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Project $project)
-    {
-        //
+   public function destroy(Project $project)
+{
+    $name = $project->name;
+
+    // Manually delete related tasks or records first
+    $project->tasks()->delete(); // if you have hasMany('App\Models\Task') in Project model
+
+    $project->delete();
+
+    if ($project->image_path) {
+        Storage::disk('public')->deleteDirectory(dirname($project->image_path));
     }
+
+    return to_route('project.index')->with('success', "Project \"$name\" was deleted!");
+}
 }
