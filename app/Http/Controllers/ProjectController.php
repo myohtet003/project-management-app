@@ -9,8 +9,7 @@ use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\TaskResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use function Termwind\renderUsing;
+use Illuminate\Support\Str; 
 
 class ProjectController extends Controller
 {
@@ -103,6 +102,7 @@ class ProjectController extends Controller
             'project' => new ProjectResource($project),
             'tasks' => TaskResource::collection($tasks),
             'queryParams' => request()->query() ?: null,
+            'success' => session("success"),
         ]);
     }
 

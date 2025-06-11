@@ -7,6 +7,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserCrudResource;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -25,7 +26,7 @@ class UserController extends Controller
         if (request('name')) {
             $query->where('name', "like", '%' . request('name') . "%");
         }
-        
+
         if (request('email')) {
             $query->where('email', "like", '%' . request('email') . "%");
         }
@@ -49,7 +50,6 @@ class UserController extends Controller
     public function create()
     {
         return inertia("User/Create");
-        
     }
 
     /**
@@ -57,7 +57,8 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $data = $request->validated();  
+        $data = $request->validated();
+        $data['email_verified_at'] = time();
         $data['password'] = bcrypt($data['password']);
 
         // dd($data);
@@ -89,11 +90,12 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        $data = $request->validated();  
+        $data = $request->validated();
+        $data['email_verified_at'] = time();
         $password = $data['password'] ?? null;
-        if($password) {
+        if ($password) {
             $data['password'] = bcrypt($password);
-        }else {
+        } else {
             unset($data['password']);
         }
         $user->update($data);
@@ -106,6 +108,12 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+
+        // dd('myo htet kyaw');
+        $name = $user->name;
+
+        $user->delete();
+
+        return to_route('user.index')->with('success', "User \"$name\" was deleted!");
     }
 }
