@@ -6,6 +6,7 @@ use App\Http\Resources\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class DashboardController extends Controller
 {
@@ -54,4 +55,24 @@ class DashboardController extends Controller
             'activeTasks'
         ));
     }
+
+
+    
+
+public function downloadMyTasksPdf(Request $request)
+{
+    // dd('myo htet kyaw');
+    $user = Auth::user();
+
+    $tasks = Task::with('project')
+        ->where('assigned_user_id', $user->id)
+        ->whereIn('status', ['pending', 'in_progress', 'completed'])
+        ->orderBy('due_date')
+        ->get();
+
+    $pdf = Pdf::loadView('tasks', compact('tasks', 'user'));
+
+    return $pdf->download('my_active_tasks.pdf');
+}
+
 }

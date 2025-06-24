@@ -28,6 +28,10 @@ Route::redirect('/', '/dashboard');
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard',  [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/my-tasks/pdf', [DashboardController::class, 'downloadMyTasksPdf'])
+    ->middleware(['auth', 'verified'])->name('tasks.pdf');
+
+
     Route::resource('project', ProjectController::class);
     Route::get('task/my-tasks', [TaskController::class, 'myTasks'])->name('task.myTasks');
     Route::resource('task', TaskController::class);
