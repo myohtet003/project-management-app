@@ -16,6 +16,7 @@ class TaskResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+
     public function toArray(Request $request): array
     {
         return [
@@ -33,6 +34,35 @@ class TaskResource extends JsonResource
             'assignedUser' => $this->assignedUser ? new UserResource($this->assignedUser) : null,
             'createdBy' => new UserResource($this->createdBy),
             'updatedBy' => new UserResource($this->updatedBy),
+
+            // ✅ Add this block for comments
+            // app/Http/Resources/TaskResource.php
+            'comments' => $this->whenLoaded('comments', function () {
+                return $this->comments->map(function ($comment) {
+                    return [
+                        'id' => $comment->id,
+                        'content' => $comment->content,
+                        'created_at' => $comment->created_at->diffForHumans(),
+                        'user' => [
+                            'id' => $comment->user->id,
+                            'name' => $comment->user->name,
+                        ],
+                        'replies' => $comment->replies->map(function ($reply) {
+                            return [
+                                'id' => $reply->id,
+                                'content' => $reply->content,
+                                'created_at' => $reply->created_at->diffForHumans(),
+                                'user' => [
+                                    'id' => $reply->user->id,
+                                    'name' => $reply->user->name,
+                                ],
+                            ];
+                        }),
+                    ];
+                });
+            }),
+
+
         ];
     }
 }

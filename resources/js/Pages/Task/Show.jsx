@@ -8,8 +8,9 @@ import {
 } from "@/constants.js";
 
 import React from "react";
+import Comment from "./Partial/Comment";
 
-export default function Show({ auth, task }) {
+export default function Show({ auth, task, success }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
@@ -29,7 +30,17 @@ export default function Show({ auth, task }) {
         >
             <Head title={`Task "${task.name}"`} />
 
-            <div className="py-12">
+            <div className="py-3">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    {success && (
+                        <div className="bg-red-500 py-2 text-white ml-auto rounded mb-4 max-w-sm sm:px-6 lg:px-8">
+                            {success}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="py-10">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                         <div>
@@ -160,6 +171,19 @@ export default function Show({ auth, task }) {
                                 </label>
                                 <p className=" mt-1">{task.description}</p>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+                        <div className="px-6 text-gray-900 dark:text-gray-100">
+                            <Comment
+                                comments={task.comments}
+                                taskId={task.id}
+                                authUser={auth.user}
+                            />
                         </div>
                     </div>
                 </div>

@@ -90,12 +90,20 @@ class TaskController extends Controller
      * Display the specified resource.
      */
     public function show(Task $task)
-    { 
+    {
+        $task->load([
+            'project',
+            'comments' => fn($q) => $q->whereNull('parent_id')->with(['user', 'replies.user']),
+        ]);
+
 
         return inertia('Task/Show', [
-            'task' => new TaskResource($task), 
+            'task' => new TaskResource($task->load('comments.user', 'comments.replies.user')),
+            'authUser' => Auth::user(),
+            'success' => session('success'),
         ]);
     }
+
 
     /**
      * Show the form for editing the specified resource.
